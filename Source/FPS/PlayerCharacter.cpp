@@ -17,7 +17,7 @@ APlayerCharacter::APlayerCharacter()
 	PrimaryActorTick.bCanEverTick = true;
 
 	// Configure character movement
-	GetCharacterMovement()->MaxWalkSpeed = 600.0f; // Default walk speed
+	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed; // Default walk speed
 
 	// Create and configure the CapsuleComponent
 	GetCapsuleComponent()->InitCapsuleSize(42.0f, 96.0f);
@@ -66,6 +66,11 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 		// Bind the Jump
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ACharacter::Jump);
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
+
+		// Bind Sprint
+		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Triggered, this, &APlayerCharacter::StartSprint);
+		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this, &APlayerCharacter::StopSprint);
 	}
 }
 
@@ -82,14 +87,25 @@ void APlayerCharacter::Look(const FInputActionValue& Value)
 {
 	FVector2D LookAxisVector = Value.Get<FVector2D>();
 
-	// Add yaw input
+	// 좌우 회전 (Yaw)
 	AddControllerYawInput(LookAxisVector.X);
 
-	// Add pitch input without clamping
+	// 현재 Pitch 가져오기
 	float CurrentPitch = Controller->GetControlRotation().Pitch;
+
+	// Clamp 제거: 자유롭게 회전 가능
 	float NewPitch = CurrentPitch + LookAxisVector.Y;
 
-	FRotator NewRotation = Controller->GetControlRotation();
-	NewRotation.Pitch = NewPitch;
-	Controller->SetControlRotation(NewRotation);
+	// 최종 회전 값 적용
+	Controller->SetControlRotation(FRotator(NewPitch, Controller->GetControlRotation().Yaw, 0.0f));
+}
+
+void APlayerCharacter::StartSprint()
+{
+	GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
+}
+
+void APlayerCharacter::StopSprint()
+{
+	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 }
