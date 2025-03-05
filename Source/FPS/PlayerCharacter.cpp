@@ -9,6 +9,13 @@
 #include "Components/CapsuleComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "DrawDebugHelpers.h"
+#include "Kismet/GameplayStatics.h"
+#include "GameFramework/DamageType.h"
+#include "Engine/World.h"
+#include "Engine.h"
+#include "Kismet/KismetSystemLibrary.h"
+#include "Target.h"
 
 // Sets default values
 APlayerCharacter::APlayerCharacter()
@@ -65,12 +72,15 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Look);
 
 		// Bind the Jump
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ACharacter::Jump);
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ACharacter::Jump);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
 
 		// Bind Sprint
 		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Triggered, this, &APlayerCharacter::StartSprint);
 		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this, &APlayerCharacter::StopSprint);
+
+		// Bind Fire
+		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &APlayerCharacter::Fire);
 	}
 }
 
@@ -108,4 +118,24 @@ void APlayerCharacter::StartSprint()
 void APlayerCharacter::StopSprint()
 {
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+}
+
+void APlayerCharacter::Fire(const FInputActionValue& Value)
+{
+	bool Fire = Value.Get<bool>();
+
+	UE_LOG(LogTemp, Warning, TEXT("Fire Button Pressed!"));
+	PerformRaycast(); // Perform raycast when firing
+}
+
+void APlayerCharacter::PerformRaycast()
+{
+	FVector Start = FirstPersonCamera->GetComponentLocation();
+	FVector End = Start + FirstPersonCamera->GetForwardVector() * FireRange;
+
+	TArray<FHitResult> HitResult;
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(this);
+
+	DrawDebugLine(GetWorld(), Start, End, FColor(255, 0, 0), false, 5.0f, 0, 5.0f);
 }

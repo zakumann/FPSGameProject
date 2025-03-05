@@ -39,11 +39,18 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	class UInputAction* SprintAction;  // 추가된 스프린트 액션
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	class UInputAction* FireAction;  // 추가된 스프린트 액션
+
 	// Movement and look functions
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
 	void StartSprint();
 	void StopSprint();
+	void Fire(const FInputActionValue& Value);
+
+	// Raycast function
+	void PerformRaycast();
 
 	// First-Person Camera
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
@@ -55,6 +62,14 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	float SprintSpeed = 1200.0f;
+
+	// Damage amount
+	UPROPERTY(EditAnywhere, Category = "Combat")
+	float DamageAmount = 25.0f;
+
+	// Raycast Range
+	UPROPERTY(EditAnywhere, Category = "Combat")
+	float FireRange = 5000.0f;
 
 public:	
 	// Called every frame
