@@ -13,7 +13,6 @@
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/DamageType.h"
 #include "Engine/World.h"
-#include "Engine.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Target.h"
 
@@ -122,20 +121,26 @@ void APlayerCharacter::StopSprint()
 
 void APlayerCharacter::Fire(const FInputActionValue& Value)
 {
-	bool Fire = Value.Get<bool>();
-
-	UE_LOG(LogTemp, Warning, TEXT("Fire Button Pressed!"));
-	PerformRaycast(); // Perform raycast when firing
+	Raycast();
 }
 
-void APlayerCharacter::PerformRaycast()
+void APlayerCharacter::Raycast()
 {
-	FVector Start = FirstPersonCamera->GetComponentLocation();
-	FVector End = Start + FirstPersonCamera->GetForwardVector() * FireRange;
+	FHitResult* HitResult = new FHitResult();
+	FVector StartTrace = FirstPersonCamera->GetComponentLocation();
+	FVector ForwardVector = FirstPersonCamera->GetForwardVector();
+	FVector EndTrace = ((ForwardVector * FireRange) + StartTrace);
+	FCollisionQueryParams* TraceParams = new FCollisionQueryParams();
 
-	TArray<FHitResult> HitResult;
-	FCollisionQueryParams Params;
-	Params.AddIgnoredActor(this);
+	if (GetWorld()->LineTraceSingleByChannel(*HitResult, StartTrace, EndTrace, ECC_Visibility, *TraceParams))
+	{
+		DrawDebugLine(GetWorld(), StartTrace, EndTrace, FColor::Red, false, 5.f);
 
-	DrawDebugLine(GetWorld(), Start, End, FColor(255, 0, 0), false, 5.0f, 0, 5.0f);
+		ATarget* TestTarget = Cast<ATarget>(HitResult->GetActor());
+
+		if (TestTarget != NULL && TestTarget->IsPendingKillEnabled())
+		{
+			TestTarget->DamageTarget(50.f);
+		}
+	}
 }

@@ -48,9 +48,7 @@ protected:
 	void StartSprint();
 	void StopSprint();
 	void Fire(const FInputActionValue& Value);
-
-	// Raycast function
-	void PerformRaycast();
+	void Raycast();
 
 	// First-Person Camera
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
@@ -63,19 +61,13 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	float SprintSpeed = 1200.0f;
 
-	// Damage amount
-	UPROPERTY(EditAnywhere, Category = "Combat")
-	float DamageAmount = 25.0f;
-
-	// Raycast Range
-	UPROPERTY(EditAnywhere, Category = "Combat")
+	UPROPERTY(EditDefaultsOnly)
 	float FireRange = 5000.0f;
-
+	
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	// Called to bind functionality to input
+// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
 };

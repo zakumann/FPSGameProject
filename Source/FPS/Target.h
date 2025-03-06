@@ -22,5 +22,12 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+	UPROPERTY(EditAnywhere)
+	UStaticMeshComponent* TargetMesh;
 
+	void DestroyTarget();
+
+	float Health;
+
+	void DamageTarget(float Damage);
 };
