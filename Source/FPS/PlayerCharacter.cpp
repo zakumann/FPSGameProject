@@ -3,18 +3,16 @@
 
 #include "PlayerCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "InputMappingContext.h"
-#include "InputAction.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
-#include "DrawDebugHelpers.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/DamageType.h"
 #include "Engine/World.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Target.h"
+#include "FPSWeaponBaseComponent.h"
 
 // Sets default values
 APlayerCharacter::APlayerCharacter()
@@ -33,6 +31,9 @@ APlayerCharacter::APlayerCharacter()
 	FirstPersonCamera->SetupAttachment(GetCapsuleComponent());
 	FirstPersonCamera->SetRelativeLocation(FVector(0.0f, 0.0f, 64.0f)); // Position the camera
 	FirstPersonCamera->bUsePawnControlRotation = true; // Rotate camera with controller
+
+	// Create Weapon Component
+	WeaponComponent = CreateDefaultSubobject<UFPSWeaponBaseComponent>(TEXT("WeaponComponent"));
 }
 
 // Called when the game starts or when spawned
@@ -77,9 +78,6 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		// Bind Sprint
 		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Triggered, this, &APlayerCharacter::StartSprint);
 		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this, &APlayerCharacter::StopSprint);
-
-		// Bind Fire
-		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &APlayerCharacter::Fire);
 	}
 }
 
@@ -95,18 +93,8 @@ void APlayerCharacter::Move(const FInputActionValue& Value)
 void APlayerCharacter::Look(const FInputActionValue& Value)
 {
 	FVector2D LookAxisVector = Value.Get<FVector2D>();
-
-	// 좌우 회전 (Yaw)
 	AddControllerYawInput(LookAxisVector.X);
-
-	// 현재 Pitch 가져오기
-	float CurrentPitch = Controller->GetControlRotation().Pitch;
-
-	// Clamp 제거: 자유롭게 회전 가능
-	float NewPitch = CurrentPitch + LookAxisVector.Y;
-
-	// 최종 회전 값 적용
-	Controller->SetControlRotation(FRotator(NewPitch, Controller->GetControlRotation().Yaw, 0.0f));
+	AddControllerPitchInput(LookAxisVector.Y);
 }
 
 void APlayerCharacter::StartSprint()
@@ -117,30 +105,4 @@ void APlayerCharacter::StartSprint()
 void APlayerCharacter::StopSprint()
 {
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
-}
-
-void APlayerCharacter::Fire(const FInputActionValue& Value)
-{
-	Raycast();
-}
-
-void APlayerCharacter::Raycast()
-{
-	FHitResult* HitResult = new FHitResult();
-	FVector StartTrace = FirstPersonCamera->GetComponentLocation();
-	FVector ForwardVector = FirstPersonCamera->GetForwardVector();
-	FVector EndTrace = ((ForwardVector * FireRange) + StartTrace);
-	FCollisionQueryParams* TraceParams = new FCollisionQueryParams();
-
-	if (GetWorld()->LineTraceSingleByChannel(*HitResult, StartTrace, EndTrace, ECC_Visibility, *TraceParams))
-	{
-		DrawDebugLine(GetWorld(), StartTrace, EndTrace, FColor::Red, false, 5.f);
-
-		ATarget* TestTarget = Cast<ATarget>(HitResult->GetActor());
-
-		if (TestTarget != NULL && TestTarget->IsPendingKillEnabled())
-		{
-			TestTarget->DamageTarget(50.f);
-		}
-	}
 }

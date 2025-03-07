@@ -5,10 +5,9 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 
-#include "EnhancedInputComponent.h"
-#include "EnhancedInputSubsystems.h"
-
 #include "PlayerCharacter.generated.h"
+
+struct FInputActionValue;
 
 UCLASS()
 class FPS_API APlayerCharacter : public ACharacter
@@ -18,6 +17,10 @@ class FPS_API APlayerCharacter : public ACharacter
 public:
 	// Sets default values for this character's properties
 	APlayerCharacter();
+
+	// First-Person Camera
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
+	class UCameraComponent* FirstPersonCamera;
 
 protected:
 	// Called when the game starts or when spawned
@@ -47,12 +50,6 @@ protected:
 	void Look(const FInputActionValue& Value);
 	void StartSprint();
 	void StopSprint();
-	void Fire(const FInputActionValue& Value);
-	void Raycast();
-
-	// First-Person Camera
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
-	class UCameraComponent* FirstPersonCamera;
 
 	/** Movement Speed */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
@@ -61,8 +58,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	float SprintSpeed = 1200.0f;
 
-	UPROPERTY(EditDefaultsOnly)
-	float FireRange = 5000.0f;
+	// Weapon Component
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
+	class UFPSWeaponBaseComponent* WeaponComponent;
 	
 public:	
 	// Called every frame
