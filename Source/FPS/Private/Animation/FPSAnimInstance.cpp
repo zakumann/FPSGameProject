@@ -12,7 +12,7 @@ void UFPSAnimInstance::NativeInitializeAnimation()
 	PlayerCharacter = Cast<AFPSCharacter>(TryGetPawnOwner());
 }
 
-virtual void NativeUpdateAnimation(float DeltaTime)
+void UFPSAnimInstance::NativeUpdateAnimation(float DeltaTime)
 {
 	Super::NativeUpdateAnimation(DeltaTime);
 	if (!PlayerCharacter)
