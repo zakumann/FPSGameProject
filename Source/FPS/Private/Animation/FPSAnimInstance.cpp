@@ -5,6 +5,7 @@
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"  
+#include "Character/FPSCharacter.h"
 
 void UFPSAnimInstance::NativeInitializeAnimation()
 {
@@ -15,6 +16,7 @@ void UFPSAnimInstance::NativeInitializeAnimation()
 void UFPSAnimInstance::NativeUpdateAnimation(float DeltaTime)
 {
 	Super::NativeUpdateAnimation(DeltaTime);
+
 	if (!PlayerCharacter)
 	{
 		PlayerCharacter = Cast<AFPSCharacter>(TryGetPawnOwner());

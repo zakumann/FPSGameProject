@@ -40,6 +40,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	class UInputAction* JumpAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	class UInputAction* SprintAction;
+
 	// ===========Movement Speed Variables===========
 	// Movement speeds
 	UPROPERTY(EditDefaultsOnly, Category = "Movement")

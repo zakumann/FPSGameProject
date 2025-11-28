@@ -23,7 +23,7 @@ AFPSCharacter::AFPSCharacter()
 	FirstPersonCamera->SetRelativeLocation(FVector(0.0f, 0.0f, 64.0f)); // Position the camera
 	FirstPersonCamera->bUsePawnControlRotation = true; // Rotate camera with controller
 
-	FirstPersonMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("FirstPersonMesh")));
+	FirstPersonMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("FirstPersonMesh"));
 	FirstPersonMesh->SetupAttachment(FirstPersonCamera);
 
 	// Initialize default speeds
@@ -98,8 +98,8 @@ void AFPSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
 
 		// Bind Sprint actions
-		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Started, this, &AFPSCharacter::StartSprint);
-		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Completed, this, &AFPSCharacter::EndSprint);
+		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Started, this, &AFPSCharacter::StartSprint);
+		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this, &AFPSCharacter::EndSprint);
 
 	}
 }
