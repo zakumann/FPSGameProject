@@ -20,6 +20,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	class UCameraComponent* FirstPersonCamera;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
+	class USkeletalMeshComponent* FirstPersonMesh;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -37,9 +40,21 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	class UInputAction* JumpAction;
 
+	// ===========Movement Speed Variables===========
+	// Movement speeds
+	UPROPERTY(EditDefaultsOnly, Category = "Movement")
+	float WalkSpeed;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Movement")
+	float SprintSpeed;
+
 	// Movement and look functions
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
+
+	// Sprint functions
+	void StartSprint();
+	void EndSprint();
 
 public:	
 	// Called every frame

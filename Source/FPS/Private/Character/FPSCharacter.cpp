@@ -22,6 +22,15 @@ AFPSCharacter::AFPSCharacter()
 	FirstPersonCamera->SetupAttachment(GetCapsuleComponent());
 	FirstPersonCamera->SetRelativeLocation(FVector(0.0f, 0.0f, 64.0f)); // Position the camera
 	FirstPersonCamera->bUsePawnControlRotation = true; // Rotate camera with controller
+
+	FirstPersonMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("FirstPersonMesh")));
+	FirstPersonMesh->SetupAttachment(FirstPersonCamera);
+
+	// Initialize default speeds
+	WalkSpeed = 400.f;
+	SprintSpeed = 800.f;
+
+
 }
 
 // Called when the game starts or when spawned
@@ -55,6 +64,15 @@ void AFPSCharacter::Look(const FInputActionValue& Value)
 	AddControllerPitchInput(LookAxisVector.Y);
 }
 
+void AFPSCharacter::StartSprint()
+{
+	GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
+}
+void AFPSCharacter::EndSprint()
+{
+	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+}
+
 // Called every frame
 void AFPSCharacter::Tick(float DeltaTime)
 {
@@ -78,6 +96,10 @@ void AFPSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 		// Bind the Jump
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ACharacter::Jump);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
+
+		// Bind Sprint actions
+		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Started, this, &AFPSCharacter::StartSprint);
+		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Completed, this, &AFPSCharacter::EndSprint);
 
 	}
 }
