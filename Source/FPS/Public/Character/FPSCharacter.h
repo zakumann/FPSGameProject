@@ -23,9 +23,16 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	class USkeletalMeshComponent* FirstPersonMesh;
 
+	// Child actor that will spawn the Pistol
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
+	class UChildActorComponent* PistolChildActor;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon")
+	class ABaseWeapon* EquippedWeapon;
 
 	// Input actions
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
@@ -43,6 +50,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	class UInputAction* SprintAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	class UInputAction* ShootAction;
+
 	// ===========Movement Speed Variables===========
 	// Movement speeds
 	UPROPERTY(EditDefaultsOnly, Category = "Movement")
@@ -58,6 +68,9 @@ protected:
 	// Sprint functions
 	void StartSprint();
 	void EndSprint();
+
+	// Shooting
+	void StartShooting();
 
 public:	
 	// Called every frame

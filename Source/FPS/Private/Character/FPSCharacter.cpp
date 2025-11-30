@@ -2,9 +2,12 @@
 
 
 #include "Character/FPSCharacter.h"
+#include "Weapons/BaseWeapon.h"
+#include "Weapons/Pistol.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/ChildActorComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 
@@ -26,6 +29,12 @@ AFPSCharacter::AFPSCharacter()
 	FirstPersonMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("FirstPersonMesh"));
 	FirstPersonMesh->SetupAttachment(FirstPersonCamera);
 
+	PistolChildActor = CreateDefaultSubobject<UChildActorComponent>(TEXT("PistolChildActor"));
+	PistolChildActor->SetupAttachment(FirstPersonMesh);
+
+	PistolChildActor->SetChildActorClass(APistol::StaticClass());
+	PistolChildActor->AttachToComponent(FirstPersonMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName("WeaponSocket"));
+
 	// Initialize default speeds
 	WalkSpeed = 400.f;
 	SprintSpeed = 800.f;
@@ -44,6 +53,18 @@ void AFPSCharacter::BeginPlay()
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
 		{
 			Subsystem->AddMappingContext(InputMappingContext, 0);
+		}
+	}
+
+	if (PistolChildActor)
+	{
+		AActor* Child = PistolChildActor->GetChildActor();
+		EquippedWeapon = Cast<ABaseWeapon>(Child);
+
+		// Make sure weapon knows its owner (for ignore-actor in traces, etc.)
+		if (EquippedWeapon)
+		{
+			EquippedWeapon->SetOwner(this);
 		}
 	}
 }
@@ -71,6 +92,19 @@ void AFPSCharacter::StartSprint()
 void AFPSCharacter::EndSprint()
 {
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+}
+
+void AFPSCharacter::StartShooting()
+{
+	if (!EquippedWeapon || !FirstPersonCamera)
+	{
+		return;
+	}
+
+	const FVector StartLocation = FirstPersonCamera->GetComponentLocation();
+	const FVector ShootDirection = FirstPersonCamera->GetForwardVector();
+
+	EquippedWeapon->FireWeapon(StartLocation, ShootDirection);
 }
 
 // Called every frame
@@ -101,6 +135,8 @@ void AFPSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Started, this, &AFPSCharacter::StartSprint);
 		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this, &AFPSCharacter::EndSprint);
 
+		// Bind Shoot action
+		EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Started, this, &AFPSCharacter::StartShooting);
 	}
 }
 

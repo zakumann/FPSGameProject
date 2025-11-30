@@ -26,6 +26,22 @@ void UFPSAnimInstance::NativeUpdateAnimation(float DeltaTime)
 		FVector Velocity = PlayerCharacter->GetVelocity();
 		Velocity.Z = 0; // Ignore vertical velocity
 		Speed = Velocity.Size();
-		bIsInAir = PlayerCharacter->GetCharacterMovement()->IsFalling();
+
+		// 2) In-air flag (jumping / falling)
+		if (const UCharacterMovementComponent* MoveComp = PlayerCharacter->GetCharacterMovement())
+		{
+			// IsFalling() == true when character is not on ground
+			bIsInAir = MoveComp->IsFalling();
+		}
+		else
+		{
+			bIsInAir = false;
+		}
+	}
+	else
+	{
+		// If no character, set safe defaults
+		Speed = 0.f;
+		bIsInAir = false;
 	}
 }
