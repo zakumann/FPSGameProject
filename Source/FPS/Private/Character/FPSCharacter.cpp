@@ -4,6 +4,7 @@
 #include "Character/FPSCharacter.h"
 #include "Weapons/BaseWeapon.h"
 #include "Weapons/Pistol.h"
+#include "Weapons/Rifle.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -104,9 +105,16 @@ void AFPSCharacter::StartShooting()
 	const FVector StartLocation = FirstPersonCamera->GetComponentLocation();
 	const FVector ShootDirection = FirstPersonCamera->GetForwardVector();
 
-	EquippedWeapon->FireWeapon(StartLocation, ShootDirection);
+	EquippedWeapon->StartShooting(StartLocation, ShootDirection);
 }
 
+void AFPSCharacter::StopShooting()
+{
+	if (EquippedWeapon)
+	{
+		EquippedWeapon->StopShooting();
+	}
+}
 // Called every frame
 void AFPSCharacter::Tick(float DeltaTime)
 {

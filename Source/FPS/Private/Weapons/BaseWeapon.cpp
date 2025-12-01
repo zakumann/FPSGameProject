@@ -6,6 +6,11 @@
 #include "DrawDebugHelpers.h"
 #include "Engine/World.h"
 #include "GameFramework/Actor.h"
+#include "TimerManager.h"
+
+// simple cached values for timer use (can be refactored later if you want)
+static FVector G_LastStartLocation;
+static FVector G_LastShootDirection;
 
 // Sets default values
 ABaseWeapon::ABaseWeapon()
@@ -16,6 +21,9 @@ ABaseWeapon::ABaseWeapon()
 	GunMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("GunMesh"));
 	GunMesh->SetupAttachment(RootComponent);
 
+	// Default automatic weapon: 600 RPM -> 0.1 seconds per shot
+	TimeBetweenShots = 0.1f;
+	bIsShooting = false;
 }
 
 // Called when the game starts or when spawned
@@ -32,6 +40,57 @@ void ABaseWeapon::Tick(float DeltaTime)
 
 }
 
+void ABaseWeapon::StartShooting(const FVector& StartLocation, const FVector& ShootDirection)
+{
+	if (!GetWorld())
+	{
+		return;
+	}
+
+	// cache camera data for timer use
+	G_LastStartLocation = StartLocation;
+	G_LastShootDirection = ShootDirection;
+
+	// fire immediately once
+	FireWeapon(StartLocation, ShootDirection);
+
+	// If TimeBetweenShots <= 0, treat as single-shot weapon (no auto-fire)
+	if (TimeBetweenShots <= 0.f)
+	{
+		return;
+	}
+
+	if (!bIsShooting)
+	{
+		bIsShooting = true;
+
+		// Start looping timer for automatic fire
+		GetWorldTimerManager().SetTimer(
+			TimerHandle_AutoFire,
+			[this]()
+			{
+				FireWeapon(G_LastStartLocation, G_LastShootDirection);
+			},
+			TimeBetweenShots,
+			true
+		);
+	}
+}
+
+void ABaseWeapon::StopShooting()
+{
+	if (!GetWorld())
+	{
+		return;
+	}
+
+	if (bIsShooting)
+	{
+		bIsShooting = false;
+		GetWorldTimerManager().ClearTimer(TimerHandle_AutoFire);
+	}
+}
+
 void ABaseWeapon::FireWeapon(const FVector& StartLocation, const FVector& ShootDirection)
 {
 	if (!GetWorld()) return;
@@ -43,7 +102,21 @@ void ABaseWeapon::FireWeapon(const FVector& StartLocation, const FVector& ShootD
 
 	FCollisionQueryParams QueryParams;
 	QueryParams.AddIgnoredActor(this); // Ignore the weapon itself
-	bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, StartLocation, EndLocation, ECC_Visibility, QueryParams);
+
+	// Ignore owner (character) so we don't hit ourselves
+	if (AActor* MyOwner = GetOwner())
+	{
+		QueryParams.AddIgnoredActor(MyOwner);
+	}
+
+	bool bHit = GetWorld()->LineTraceSingleByChannel(
+		HitResult,
+		StartLocation,
+		EndLocation,
+		ECC_Visibility,
+		QueryParams
+	);
+
 	if (bHit)
 	{
 		// Draw debug line to the hit location

@@ -71,6 +71,7 @@ protected:
 
 	// Shooting
 	void StartShooting();
+	void StopShooting();
 
 public:	
 	// Called every frame

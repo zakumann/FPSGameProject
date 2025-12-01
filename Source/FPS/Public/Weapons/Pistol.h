@@ -15,6 +15,8 @@ class FPS_API APistol : public ABaseWeapon
 	GENERATED_BODY()
 
 public:
+	APistol();
+
 	// Animation to play when firing
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon|Animation")
 	class UAnimationAsset* FireAnimation;

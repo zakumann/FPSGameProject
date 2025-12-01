@@ -10,22 +10,39 @@ UCLASS()
 class FPS_API ABaseWeapon : public AActor
 {
 	GENERATED_BODY()
-	
-public:	
-	// Sets default values for this actor's properties
+
+public:
 	ABaseWeapon();
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
 	class USkeletalMeshComponent* GunMesh;
 
 protected:
-	// Called when the game starts or when spawned
+
 	virtual void BeginPlay() override;
 
-public:	
+	// Time between shots in seconds (for automatic weapons)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon")
+	float TimeBetweenShots;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon|Fire")
+	bool bIsShooting;
+
+	FTimerHandle TimerHandle_AutoFire;
+
+	// Make FireWeapon public so AFPSCharacter can call it
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	virtual void FireWeapon(const FVector& StartLocation, const FVector& Direction);
+
+public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	// Called by character when player starts shooting (pressed button)
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
-	void FireWeapon(const FVector& StartLocation, const FVector& ShootDirection);
+	virtual void StartShooting(const FVector& StartLocation, const FVector& ShootDirection);
+
+	// Called by character when player stops shooting (released button)
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	virtual void StopShooting();
 };

@@ -5,6 +5,12 @@
 #include "Components/SkeletalMeshComponent.h"
 
 
+APistol::APistol()
+{
+	// Single shot: no automatic repeat
+	TimeBetweenShots = 0.f;
+}
+
 void APistol::FireWeapon(const FVector& StartLocation, const FVector& ShootDirection)
 {
 	// Play the fire animation if it is set
@@ -12,5 +18,6 @@ void APistol::FireWeapon(const FVector& StartLocation, const FVector& ShootDirec
 	{
 		GunMesh->PlayAnimation(FireAnimation, false);
 	}
-	// Implement shooting logic here (e.g., spawn projectiles, apply damage, etc.)
+	
+	Super::FireWeapon(StartLocation, ShootDirection);
 }
